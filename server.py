@@ -1,3 +1,5 @@
+
+import logging
 import json
 
 import bottle
@@ -22,13 +24,14 @@ interface.create_summary_json()
 def get_elevation(lat, lng):
     """
     Get the elevation at point (lat,lng) using the currently opened interface
-    :param lat: 
-    :param lng: 
+    :param lat:
+    :param lng:
     :return:
     """
     try:
         elevation = interface.lookup(lat, lng)
-    except:
+    except Exception as ex:
+        logging.warn('exception = %s', ex)
         return {
             'latitude': lat,
             'longitude': lng,
@@ -46,7 +49,7 @@ def get_elevation(lat, lng):
 def enable_cors():
     """
     Enable CORS support.
-    :return: 
+    :return:
     """
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'PUT, GET, POST, DELETE, OPTIONS'
@@ -56,8 +59,8 @@ def enable_cors():
 def lat_lng_from_location(location_with_comma):
     """
     Parse the latitude and longitude of a location in the format "xx.xxx,yy.yyy" (which we accept as a query string)
-    :param location_with_comma: 
-    :return: 
+    :param location_with_comma:
+    :return:
     """
     try:
         lat, lng = [float(i) for i in location_with_comma.split(',')]
@@ -69,7 +72,7 @@ def lat_lng_from_location(location_with_comma):
 def query_to_locations():
     """
     Grab a list of locations from the query and turn them into [(lat,lng),(lat,lng),...]
-    :return: 
+    :return:
     """
     locations = request.query.locations
     if not locations:
@@ -81,7 +84,7 @@ def query_to_locations():
 def body_to_locations():
     """
     Grab a list of locations from the body and turn them into [(lat,lng),(lat,lng),...]
-    :return: 
+    :return:
     """
     try:
         locations = request.json.get('locations', None)
@@ -105,7 +108,7 @@ def do_lookup(get_locations_func):
     """
     Generic method which gets the locations in [(lat,lng),(lat,lng),...] format by calling get_locations_func
     and returns an answer ready to go to the client.
-    :return: 
+    :return:
     """
     try:
         locations = get_locations_func()
@@ -127,7 +130,7 @@ def cors_handler():
 def get_lookup():
     """
     GET method. Uses query_to_locations.
-    :return: 
+    :return:
     """
     return do_lookup(query_to_locations)
 
@@ -136,7 +139,7 @@ def get_lookup():
 def post_lookup():
     """
         GET method. Uses body_to_locations.
-        :return: 
+        :return:
         """
     return do_lookup(body_to_locations)
 
