@@ -3,6 +3,7 @@ from lazy import lazy
 from pprint import pprint
 from os import listdir
 from os.path import isfile, join
+import logging
 import json
 from rtree import index
 
@@ -57,13 +58,13 @@ class GDALInterface(object):
 
     def lookup(self, lat, lon):
         try:
-
             # get coordinate of the raster
             xgeo, ygeo, zgeo = self.coordinate_transform.TransformPoint(lon, lat, 0)
 
             # convert it to pixel/line on band
             u = xgeo - self.geo_transform_inv[0]
             v = ygeo - self.geo_transform_inv[3]
+
             # FIXME this int() is probably bad idea, there should be half cell size thing needed
             xpix = int(self.geo_transform_inv[1] * u + self.geo_transform_inv[2] * v)
             ylin = int(self.geo_transform_inv[4] * u + self.geo_transform_inv[5] * v)
@@ -158,7 +159,7 @@ class GDALTileInterface(object):
         nearest = list(self.index.nearest((lat, lng), 1, objects=True))
 
         if not nearest:
-            raise Exception('Invalid latitude/longitude')
+            raise Exception('Invalid lat/lon, near = %s' % (nearest))
         else:
             coords = nearest[0].object
 
