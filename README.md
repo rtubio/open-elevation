@@ -14,3 +14,20 @@ If you enjoy our service, please consider [donating to us](https://open-elevatio
 
 You can learn more about the project, including its **free public API** in [the website](https://open-elevation.com)
 
+# setup
+
+* build docker image
+
+    docker build -f config/Dockerfile .
+
+* link the directory with the TIF images to "$(pwd)/data"
+
+    ln -sf "$PATH_TO_TIF_DIR" data
+
+* split out TIF images (raster to 10 10)
+
+    bash scripts/create-dataset.sh data
+
+* run docker image and detach it
+
+  docker run --detach --name open-elevation -v $(pwd)/data:/code/data -p 8001:8080 openelevation/open-elevation
