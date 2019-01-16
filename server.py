@@ -24,10 +24,13 @@ interface.create_summary_json()
 def get_elevation(lat, lng):
     """
     Get the elevation at point (lat,lng) using the currently opened interface
-    :param lat:
     :param lng:
+    :param lat:
     :return:
     """
+
+    print('XXX')
+    logging.info('Getting elevation information for (%s, %s)', lat, lng)
     try:
         elevation = interface.lookup(lat, lng)
     except Exception as ex:

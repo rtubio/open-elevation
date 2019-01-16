@@ -7,6 +7,10 @@ import logging
 import json
 from rtree import index
 
+
+_log = logging.getLogger()
+
+
 # Originally based on https://stackoverflow.com/questions/13439357/extract-point-from-raster-in-gdal
 class GDALInterface(object):
     SEA_LEVEL = 0
@@ -39,11 +43,15 @@ class GDALInterface(object):
         spatial_reference.ImportFromEPSG(4326)  # WGS84
 
         # coordinate transformation
-        self.coordinate_transform = osr.CoordinateTransformation(spatial_reference, spatial_reference_raster)
+        self.coordinate_transform = osr.CoordinateTransformation(
+            spatial_reference, spatial_reference_raster
+        )
         gt = self.geo_transform = self.src.GetGeoTransform()
         dev = (gt[1] * gt[5] - gt[2] * gt[4])
-        self.geo_transform_inv = (gt[0], gt[5] / dev, -gt[2] / dev,
-                                  gt[3], -gt[4] / dev, gt[1] / dev)
+        self.geo_transform_inv = (
+            gt[0], gt[5] / dev, -gt[2] / dev,
+            gt[3], -gt[4] / dev, gt[1] / dev
+        )
 
 
 
@@ -123,12 +131,16 @@ class GDALTileInterface(object):
         return [f for f in listdir(self.tiles_folder) if isfile(join(self.tiles_folder, f)) and f.endswith(u'.tif')]
 
     def create_summary_json(self):
+        _log.info('Creating JSON summary:')
         all_coords = []
         for file in self._all_files():
 
             full_path = join(self.tiles_folder,file)
             i = self._open_gdal_interface(full_path)
             coords = i.get_corner_coords()
+
+            _log.info('>>> adding <%s> with coords=', file, coords)
+
             all_coords += [
                 {
                     'file': full_path,
@@ -167,8 +179,12 @@ class GDALTileInterface(object):
             return int(gdal_interface.lookup(lat, lng))
 
     def _build_index(self):
+        _log.info('Building index...')
+
         index_id = 1
         for e in self.all_coords:
+
+            _log.info('>>> adding polygon within (%s)', e)
             e['index_id'] = index_id
             left, bottom, right, top = (e['coords'][0], e['coords'][2], e['coords'][1], e['coords'][3])
             self.index.insert( index_id, (left, bottom, right, top), obj=e)

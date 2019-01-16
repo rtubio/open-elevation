@@ -39,7 +39,7 @@ sudo apt -y install $(grep -vE "^\s*#" "$PACKAGES_FILE" | tr "\n" " ")
 
   pip install -r "$REQUIREMENTS_FILE"
 
-  pip uninstall GDAL
+  pip uninstall -y GDAL
 
   pip install GDAL==2.1.3\
     --global-option=build_ext\

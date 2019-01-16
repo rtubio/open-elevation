@@ -1,19 +1,15 @@
 #!/usr/bin/env bash
 
-OUTDIR="/code/data"
-if [ ! -e $OUTDIR ] ; then
-    echo $OUTDIR does not exist!
+DATA_DIR="$1"
+
+if [ ! -e "$DATA_DIR" ] ; then
+    echo "$DATA_DIR does not exist!"
+    exit -1
 fi
 
-CUR_DIR=$(pwd)
-
-set -eu
-
-cd $OUTDIR
-../download-srtm-data.sh
-../create-tiles.sh SRTM_NE_250m.tif 10 10
-../create-tiles.sh SRTM_SE_250m.tif 10 10
-../create-tiles.sh SRTM_W_250m.tif 10 20
-rm -rf SRTM_NE_250m.tif SRTM_SE_250m.tif SRTM_W_250m.tif *.rar
-
-cd $CUR_DIR
+for i in $DATA_DIR/*.tif
+do
+  echo "Processing $i..."
+  bash scripts/create-tiles.sh "$i" 10 10
+  mv -f "$i" "$i.bak"
+done
